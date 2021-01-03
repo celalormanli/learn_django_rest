@@ -4,11 +4,11 @@ from rest_framework.parsers import JSONParser
 from snippets.models import Snippet
 from snippets.serializers import SnippetSerializer
 from snippets.permissions import IsOwnerOrReadOnly
-from rest_framework.decorators import api_view
+from rest_framework.decorators import api_view, action
 from rest_framework.response import Response
 from django.http import Http404
 from rest_framework.views import APIView
-from rest_framework import mixins, generics, renderers, permissions, status
+from rest_framework import mixins, generics, renderers, permissions, status, viewsets
 from django.contrib.auth.models import User
 from snippets.serializers import UserSerializer
 from rest_framework.reverse import reverse
@@ -94,7 +94,7 @@ def snippet_detail(request,pk, format=None):
         return Response(status=status.HTTP_204_NO_CONTENT)
 '''
 
-
+'''
 class SnippetList(generics.ListCreateAPIView):
     permission_classes=[permissions.IsAuthenticatedOrReadOnly]
     queryset=Snippet.objects.all()
@@ -103,31 +103,15 @@ class SnippetList(generics.ListCreateAPIView):
 
     def perform_create(self, serializer):
         serializer.save(owner=self.request.user)
-    '''    
-    def get(self, request, *args, **kwargs):
-        return self.list(request, *args, **kwargs)
-    
-    def post(self, request, *args, **kwargs):
-        return self.create(request, *args, **kwargs)
-
-    '''
 
 class SnippetDetail(generics.RetrieveUpdateDestroyAPIView):
     
     permission_classes=[permissions.IsAuthenticatedOrReadOnly, IsOwnerOrReadOnly]
     queryset=Snippet.objects.all()
     serializer_class=SnippetSerializer
-    '''
-    def get(self, request, *args, **kwargs):
-        return self.retrieve(request, *args, **kwargs)
-    
-    def put(self, request, *args, **kwargs):
-        return self.update(request, *args, **kwargs)
-    
-    def delete(self, request, *args, **kwargs):
-        return self.destroy(request, *args, **kwargs) 
-    '''
+'''
 
+'''
 class UserList(generics.ListAPIView):
     queryset=User.objects.all()
     serializer_class=UserSerializer
@@ -135,6 +119,13 @@ class UserList(generics.ListAPIView):
 class UserDetail(generics.RetrieveAPIView):
     queryset=User.objects.all()
     serializer_class=UserSerializer
+'''
+
+class UserViewSet(viewsets.ReadOnlyModelViewSet):
+    queryset = User.objects.all()
+    serializer_class=UserSerializer
+
+
 
 @api_view(['GET'])
 def api_root(request, format=None):
@@ -144,7 +135,7 @@ def api_root(request, format=None):
     })
 
 
-
+'''
 class SnippetHighlight(generics.GenericAPIView):
     queryset = Snippet.objects.all()
     renderer_classes=[renderers.StaticHTMLRenderer]
@@ -152,3 +143,17 @@ class SnippetHighlight(generics.GenericAPIView):
     def get(self, request, *args, **kwargs):
         snippet=self.get_object()
         return Response(snippet.highlight)
+'''
+
+class SnippetViewSet(viewsets.ModelViewSet):
+    queryset = Snippet.objects.all()
+    serializer_class=SnippetSerializer
+    permission_classes=[permissions.IsAuthenticatedOrReadOnly, IsOwnerOrReadOnly]
+
+    @action(detail=True, renderer_classes=[renderers.StaticHTMLRenderer])
+    def highligt(self, request, *args, **kwargs):
+        snippet=self.get_object()
+        return Response(snippet.highliht)
+    
+    def perform_create(self, serializer):
+        serializer.save(owner=self.request.user)
