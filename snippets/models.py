@@ -19,14 +19,14 @@ class Snippet(models.Model):
     language=models.CharField(choices=LANGUAGE_CHOICES,default='python',max_length=100)
     style=models.CharField(choices=STYLE_CHOICES, default='friendly',max_length=100)
     owner=models.ForeignKey('auth.user', related_name='snippets', on_delete=models.CASCADE)
-    highlighted=models.TextField()
+    highlight=models.TextField()
 
     def save(self, *args, **kwargs):
         lexer=get_lexer_by_name(self.language)
         linenos='table' if self.linenos else False
         options={'title':self.title} if self.title else {}
         formatter=HtmlFormatter(style=self.style, linenos=linenos, full=True, **options)
-        self.highlighted=highlight(self.code, lexer, formatter)
+        self.highlight=highlight(self.code, lexer, formatter)
         super(Snippet, self).save(*args, **kwargs)
 
     class Meta:
