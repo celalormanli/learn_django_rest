@@ -21,7 +21,7 @@ def snippet_list(request):
         snippets=Snippet.objects.all()
         serializer=SnippetSerializer(snippets, many=True)
         return JsonResponse(serializer.data,safe=False)
-    
+
     elif request.method=='POST':
         data=JSONParser().parse(request)
         serializer=SnippetSerializer(data=data)
@@ -47,7 +47,6 @@ def snippet_list(request,format=None):
 '''
 
 
-
 '''
 @csrf_exempt
 def snippet_detail(request, pk):
@@ -55,11 +54,11 @@ def snippet_detail(request, pk):
         snippet = Snippet.objects.get(pk=pk)
     except Snippet.DoesNotExist:
         return HttpResponse(status=404)
-    
+
     if request.method=='GET':
         serializer = SnippetSerializer(snippet)
         return JsonResponse(serializer.data)
-    
+
     elif request.method=='PUT':
         data=JSONParser().parse(request)
         serializer=SnippetSerializer(snippet,data=data)
@@ -79,7 +78,7 @@ def snippet_detail(request,pk, format=None):
         snippet=Snippet.objects.get(pk=pk)
     except Snippet.DoesNotExist:
         return Response(status=status.HTTP_404_NOT_FOUND)
-    
+
     if request.method=='GET':
         serializer=SnippetSerializer(snippet)
         return Response(serializer.data)
@@ -105,7 +104,7 @@ class SnippetList(generics.ListCreateAPIView):
         serializer.save(owner=self.request.user)
 
 class SnippetDetail(generics.RetrieveUpdateDestroyAPIView):
-    
+
     permission_classes=[permissions.IsAuthenticatedOrReadOnly, IsOwnerOrReadOnly]
     queryset=Snippet.objects.all()
     serializer_class=SnippetSerializer
@@ -121,10 +120,10 @@ class UserDetail(generics.RetrieveAPIView):
     serializer_class=UserSerializer
 '''
 
+
 class UserViewSet(viewsets.ReadOnlyModelViewSet):
     queryset = User.objects.all()
-    serializer_class=UserSerializer
-
+    serializer_class = UserSerializer
 
 
 @api_view(['GET'])
@@ -145,15 +144,18 @@ class SnippetHighlight(generics.GenericAPIView):
         return Response(snippet.highlight)
 '''
 
+
 class SnippetViewSet(viewsets.ModelViewSet):
     queryset = Snippet.objects.all()
-    serializer_class=SnippetSerializer
-    permission_classes=[permissions.IsAuthenticatedOrReadOnly, IsOwnerOrReadOnly]
+    serializer_class = SnippetSerializer
+    permission_classes = [
+        permissions.IsAuthenticatedOrReadOnly,
+        IsOwnerOrReadOnly]
 
     @action(detail=True, renderer_classes=[renderers.StaticHTMLRenderer])
     def highligt(self, request, *args, **kwargs):
-        snippet=self.get_object()
+        snippet = self.get_object()
         return Response(snippet.highliht)
-    
+
     def perform_create(self, serializer):
         serializer.save(owner=self.request.user)

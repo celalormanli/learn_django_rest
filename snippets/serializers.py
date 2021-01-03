@@ -2,8 +2,9 @@ from rest_framework import serializers
 from snippets.models import Snippet, LANGUAGE_CHOICES, STYLE_CHOICES
 from django.contrib.auth.models import User
 
+
 class SnippetSerializer(serializers.HyperlinkedModelSerializer):
-    '''   
+    '''
     id=serializers.IntegerField(read_only=True)
     title=serializers.CharField(required=False, allow_blank=True, max_length=100)
     code=serializers.CharField(style={'base_template':'textarea.html'})
@@ -11,8 +12,9 @@ class SnippetSerializer(serializers.HyperlinkedModelSerializer):
     language=serializers.ChoiceField(choices=LANGUAGE_CHOICES, default='python')
     style =serializers.ChoiceField(choices=STYLE_CHOICES,default='friendly')
     '''
-    owner=serializers.ReadOnlyField(source='owner.username')
-    highlight=serializers.HyperlinkedIdentityField(view_name='snippet-highlight', format='html')
+    owner = serializers.ReadOnlyField(source='owner.username')
+    highlight = serializers.HyperlinkedIdentityField(
+        view_name='snippet-highlight', format='html')
     '''
     def create(self, validated_data):
         return Snippet.objects.create(**validated_data)
@@ -27,12 +29,23 @@ class SnippetSerializer(serializers.HyperlinkedModelSerializer):
         return instance
     '''
     class Meta:
-        model=Snippet
-        fields=['url','id','highlight','title','code','linenos','language','style','owner']
-        
+        model = Snippet
+        fields = [
+            'url',
+            'id',
+            'highlight',
+            'title',
+            'code',
+            'linenos',
+            'language',
+            'style',
+            'owner']
+
+
 class UserSerializer(serializers.HyperlinkedModelSerializer):
-    snippets = serializers.HyperlinkedIdentityField(many=True, view_name='snippet-detail', read_only=True)
+    snippets = serializers.HyperlinkedIdentityField(
+        many=True, view_name='snippet-detail', read_only=True)
 
     class Meta:
-        model=User
-        fields=['url','id','username','snippets']
+        model = User
+        fields = ['url', 'id', 'username', 'snippets']
